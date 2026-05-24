@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DTIP Kadomoto PDF Reader - Quick Start Script
+pkiler - Quick Start Script
 Run this to start the reader application
 """
 import os, sys, subprocess, time, webbrowser
@@ -9,7 +9,7 @@ PORT = 8899
 DESKTOP = os.path.expanduser("~/Desktop")
 
 print("=" * 50)
-print("DTIP Kadomoto PDF Reader")
+print("pkiler PDF Reader")
 print("=" * 50)
 print()
 print("Starting backend server...")

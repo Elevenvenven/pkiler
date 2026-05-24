@@ -13,7 +13,7 @@ SERVER_PID=$!
 sleep 2
 
 # Open the reader
-open DTIP_Kadomoto_Reader.html
+open pkiler.app
 
 echo "Server PID: $SERVER_PID"
 echo "Press Ctrl+C to stop"
