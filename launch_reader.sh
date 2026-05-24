@@ -1,0 +1,20 @@
+#!/bin/bash
+# Launch DTIP Reader with backend server
+cd ~/Desktop
+
+# Kill any existing server on port 8899
+lsof -ti:8899 | xargs kill 2>/dev/null
+
+# Start backend server
+python3 reader_server.py &
+SERVER_PID=$!
+
+# Wait for server to start
+sleep 2
+
+# Open the reader
+open DTIP_Kadomoto_Reader.html
+
+echo "Server PID: $SERVER_PID"
+echo "Press Ctrl+C to stop"
+wait $SERVER_PID

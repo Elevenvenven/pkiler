@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pkiler - AI 幻灯片解读器</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;background:#0d1117;color:#e6edf3}
+.app{display:flex;flex-direction:column;height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:8px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.header h1{font-size:14px;font-weight:600;color:#e6edf3;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header .meta{font-size:11px;color:#8b949e;white-space:nowrap}
+.main{display:flex;flex:1;overflow:hidden}
+.left{flex:1;display:flex;flex-direction:column;border-right:1px solid #30363d;background:#000;position:relative}
+.left .slide-img-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px}
+.left .slide-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;box-shadow:0 2px 16px rgba(0,0,0,0.5)}
+.right{width:42%;min-width:320px;display:flex;flex-direction:column;background:#0d1117}
+.right .r-header{padding:10px 16px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:8px}
+.right .r-header h2{font-size:13px;color:#58a6ff;font-weight:600}
+.right .r-header .badge{font-size:11px;background:#1f6feb;color:#fff;padding:2px 8px;border-radius:10px;margin-left:auto}
+.right .r-body{flex:1;overflow-y:auto;padding:20px}
+.right .r-body .ctext{font-size:15px;line-height:2;color:#c9d1d9;letter-spacing:0.3px}
+.right .r-body .ctext p{margin:14px 0;padding-bottom:14px;border-bottom:1px solid #21262d}
+.right .r-body .ctext p:first-child::first-letter{font-size:28px;font-weight:700;color:#58a6ff;float:left;margin:0 8px 0 0;line-height:1}
+.right .r-body .ctext h1,.right .r-body .ctext h2,.right .r-body .ctext h3{color:#58a6ff;margin:12px 0 8px 0}
+.right .r-body .ctext h1{font-size:18px}
+.right .r-body .ctext h2{font-size:16px}
+.right .r-body .ctext h3{font-size:14px}
+.right .r-body .ctext ul,.right .r-body .ctext ol{margin:8px 0 8px 20px}
+.right .r-body .ctext li{margin:4px 0}
+.right .r-body .ctext code{background:#21262d;padding:2px 6px;border-radius:3px;font-size:12px;color:#f0883e}
+.right .r-body .ctext strong{color:#f0883e}
+.right .r-body .ctext em{color:#a5d6ff}
+.right .r-body .ctext blockquote{border-left:3px solid #30363d;padding-left:12px;color:#8b949e;margin:8px 0}
+.right .r-body .ctext table{border-collapse:collapse;margin:8px 0;width:100%}
+.right .r-body .ctext th,.right .r-body .ctext td{border:1px solid #30363d;padding:6px 10px;text-align:left}
+.right .r-body .ctext th{background:#161b22;color:#58a6ff}
+.nav{background:#161b22;border-top:1px solid #30363d;padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav button{background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s}
+.nav button:hover{background:#30363d;border-color:#484f58}
+.nav button.primary{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.nav button.primary:hover{background:#388bfd}
+.nav button.overview{background:#238636;border-color:#238636;color:#fff}
+.nav button.overview:hover{background:#2ea043}
+.nav button:disabled{opacity:.3;cursor:not-allowed}
+.nav .pg{font-size:12px;color:#8b949e}
+.nav .pg span{color:#58a6ff;font-weight:600}
+.progress{height:2px;background:#21262d;flex-shrink:0}
+.progress .fill{height:100%;background:linear-gradient(90deg,#1f6feb,#58a6ff);transition:width .3s}
+.toc-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;justify-content:center;align-items:center}
+.toc-bg.show{display:flex}
+.toc{background:#161b22;border:1px solid #30363d;border-radius:12px;width:480px;max-height:70vh;overflow-y:auto;padding:20px}
+.toc h3{font-size:14px;color:#58a6ff;margin-bottom:12px}
+.toc .ti{padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px;color:#c9d1d9;display:flex;gap:8px}
+.toc .ti:hover{background:#21262d}
+.toc .ti .tn{color:#58a6ff;font-weight:600;min-width:24px}
+.error{color:#f85149;background:#1c1017;border:1px solid #f8514933;padding:12px;border-radius:6px;margin:8px 0}
+.toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;margin-left:8px}
+.toggle-wrap input{display:none}
+.toggle-slider{width:32px;height:18px;background:#30363d;border-radius:9px;position:relative;transition:background .2s}
+.toggle-slider::after{content:'';position:absolute;width:14px;height:14px;background:#8b949e;border-radius:50%;top:2px;left:2px;transition:all .2s}
+.toggle-wrap input:checked+.toggle-slider{background:#1f6feb}
+.toggle-wrap input:checked+.toggle-slider::after{left:16px;background:#fff}
+.toggle-label{font-size:11px;color:#8b949e}
+.toggle-wrap input:checked~.toggle-label{color:#58a6ff}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1 id="titleEl">📄 pkiler — AI 幻灯片解读器</h1>
+    <div class="meta" id="metaEl">打开 PDF 即可开始</div>
+  </div>
+  <div class="progress"><div class="fill" id="pf" style="width:0%"></div></div>
+  <div class="main">
+    <div class="left">
+      <div class="slide-img-wrap"><img id="slideImg" src="" alt="slide"></div>
+    </div>
+    <div class="right">
+      <div class="r-header">
+        <h2>🔍 AI 解读</h2>
+        <div class="badge" id="badge">就绪</div>
+      </div>
+      <div class="r-body"><div class="ctext" id="ctext">点击「解读此页」查看 AI 解读。</div></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button id="bp" onclick="go(-1)" disabled>◀ 上一页</button>
+    <button class="primary" id="btnBrief" onclick="analyze('brief')">简略</button>
+    <button class="primary" id="btnStandard" onclick="analyze('standard')">标准</button>
+    <button class="primary" id="btnDetail" onclick="analyze('detailed')">详细</button>
+    <div class="pg">第 <span id="cp">0</span> / <span id="tp">0</span> 页</div>
+    <button id="bn" onclick="go(1)" disabled>下一页 ▶</button>
+    <label class="toggle-wrap" title="通俗模式：用最简单的大白话解释，适合非专业人士">
+      <input type="checkbox" id="plainToggle">
+      <span class="toggle-slider"></span>
+      <span class="toggle-label">通俗模式</span>
+    </label>
+    <button class="overview" id="btnOverview" onclick="overview()">📋 整体解读</button>
+    <button onclick="toggleToc()" style="background:none;border:none;color:#8b949e;font-size:12px;text-decoration:underline">📑 目录</button>
+  </div>
+</div>
+<div class="toc-bg" id="tbg" onclick="if(event.target===this)toggleToc()">
+  <div class="toc"><h3>📑 目录</h3><div id="tl"></div></div>
+</div>
+<div class="dropzone" id="dropzone">
+  <h2>拖放 PDF 文件</h2>
+  <p>或将 PDF 拖入此窗口开始阅读</p>
+</div>
+<script>
+let P = [];
+let T = {};
+let N = 0;
+let c = 0;
+let isAnalyzing = false;
+
+function render() {
+  if (N === 0) return;
+  const p = P[c];
+  document.getElementById('slideImg').src = '/images/' + p.id;
+  document.getElementById('cp').textContent = p.id;
+  document.getElementById('tp').textContent = N;
+  document.getElementById('pf').style.width = ((p.id / N) * 100) + '%';
+  document.getElementById('bp').disabled = c === 0;
+  document.getElementById('bn').disabled = c === N - 1;
+  document.getElementById('badge').textContent = '就绪';
+  document.getElementById('ctext').innerHTML = '<span style="color:#8b949e">点击「解读此页」查看解读。</span>';
+}
+
+function go(d) {
+  if (isAnalyzing) return;
+  c = Math.max(0, Math.min(N - 1, c + d));
+  render();
+}
+
+function renderMarkdown(text) {
+  try {
+    if (typeof marked !== 'undefined') {
+      return marked.parse(text);
+    }
+  } catch(e) {}
+  return text.replace(/\n/g, '<br>');
+}
+
+function analyze(level) {
+  if (isAnalyzing || N === 0) return;
+  isAnalyzing = true;
+  const p = P[c];
+  const labels = {brief:'简略', standard:'标准', detailed:'详细'};
+  document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '0.5'; });
+  document.getElementById(level === 'brief' ? 'btnBrief' : level === 'standard' ? 'btnStandard' : 'btnDetail').style.opacity = '1';
+  document.getElementById('badge').textContent = '第' + p.id + '页' + labels[level] + '解读中...';
+  document.getElementById('ctext').innerHTML = '<span style="color:#58a6ff">⏳ 正在' + labels[level] + '解读第' + p.id + '页...</span>';
+  document.querySelector('.r-body').scrollTop = 0;
+
+  fetch('/api/analyze', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({page: p.id, text: p.title, use_image: true, level: level, plain: document.getElementById('plainToggle').checked, prompt: ''})
+  }).then(response => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+
+    function read() {
+      reader.read().then(({done, value}) => {
+        if (done) {
+          document.getElementById('ctext').innerHTML = renderMarkdown(fullText);
+          document.getElementById('badge').textContent = '第' + p.id + '页解读完成';
+          document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '1'; });
+          isAnalyzing = false;
+          return;
+        }
+        buffer += decoder.decode(value, {stream: true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const json = JSON.parse(data);
+              if (json.text) {
+                fullText += json.text;
+                document.getElementById('ctext').textContent = fullText;
+                document.querySelector('.r-body').scrollTop = document.querySelector('.r-body').scrollHeight;
+              }
+            } catch(e) {}
+          }
+        }
+        read();
+      }).catch(err => {
+        document.getElementById('badge').textContent = '错误';
+        document.getElementById('ctext').innerHTML = '<div class="error">❌ ' + err.message + '</div>';
+        document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '1'; });
+        isAnalyzing = false;
+      });
+    }
+    read();
+  }).catch(err => {
+    document.getElementById('badge').textContent = '连接失败';
+    document.getElementById('ctext').innerHTML = '<div class="error">❌ 无法连接后端</div>';
+    document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '1'; });
+    isAnalyzing = false;
+  });
+}
+
+function overview() {
+  if (isAnalyzing || N === 0) return;
+  isAnalyzing = true;
+  document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '0.5'; });
+  document.getElementById('badge').textContent = '整体解读中...';
+  document.getElementById('ctext').innerHTML = '<span style="color:#58a6ff">⏳ 正在分析全部内容，请稍候...</span>';
+  document.querySelector('.r-body').scrollTop = 0;
+
+  const allTitles = P.map(p => '第' + p.id + '页：' + p.title).join('\n');
+
+  fetch('/api/overview', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({titles: allTitles, plain: document.getElementById('plainToggle').checked})
+  }).then(response => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+
+    function read() {
+      reader.read().then(({done, value}) => {
+        if (done) {
+          document.getElementById('badge').textContent = '整体解读完成';
+          document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '1'; });
+          isAnalyzing = false;
+          return;
+        }
+        buffer += decoder.decode(value, {stream: true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const json = JSON.parse(data);
+              if (json.text) {
+                fullText += json.text;
+                document.getElementById('ctext').textContent = fullText;
+                document.querySelector('.r-body').scrollTop = document.querySelector('.r-body').scrollHeight;
+              }
+            } catch(e) {}
+          }
+        }
+        read();
+      }).catch(err => {
+        document.getElementById('badge').textContent = '错误';
+        document.getElementById('ctext').innerHTML = '<div class="error">❌ ' + err.message + '</div>';
+        document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '1'; });
+        isAnalyzing = false;
+      });
+    }
+    read();
+  }).catch(err => {
+    document.getElementById('badge').textContent = '连接失败';
+    document.getElementById('ctext').innerHTML = '<div class="error">❌ 无法连接后端</div>';
+    document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '1'; });
+    isAnalyzing = false;
+  });
+}
+
+function toggleToc() { document.getElementById('tbg').classList.toggle('show'); }
+function buildToc() {
+  let h = '';
+  for (let i = 0; i < N; i++) {
+    const p = P[i]; const t = T[p.id] || '';
+    h += '<div class="ti" onclick="c=' + i + ';render();toggleToc()"><span class="tn">' + p.id + '</span><span>' + t + '</span></div>';
+  }
+  document.getElementById('tl').innerHTML = h;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+  if (e.key === '1' && !isAnalyzing && N > 0) analyze('brief');
+  if (e.key === '2' && !isAnalyzing && N > 0) analyze('standard');
+  if (e.key === '3' && !isAnalyzing && N > 0) analyze('detailed');
+  if (e.key === 'Escape') toggleToc();
+});
+</script>
+</body>
+</html>

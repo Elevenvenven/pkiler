@@ -1,0 +1,38 @@
+#!/bin/bash
+# pkiler - macOS App Launcher
+APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+RESOURCES="$APP_DIR/Resources"
+PORT=8899
+
+# Use full path to python3
+PYTHON="/opt/anaconda3/bin/python3"
+
+# Kill any existing server on this port
+lsof -ti:$PORT | xargs kill 2>/dev/null
+sleep 0.5
+
+# Load .env if present
+if [ -f "$RESOURCES/.env" ]; then
+    set -a
+    source "$RESOURCES/.env"
+    set +a
+fi
+
+# Start the Flask server
+cd "$RESOURCES"
+$PYTHON pkiler_server.py &
+SERVER_PID=$!
+
+# Wait for server to be ready
+for i in $(seq 1 15); do
+    if curl -s http://127.0.0.1:$PORT/ > /dev/null 2>&1; then
+        break
+    fi
+    sleep 0.5
+done
+
+# Open the reader in default browser
+open "http://127.0.0.1:$PORT"
+
+# Keep running until the user closes the app
+wait $SERVER_PID
