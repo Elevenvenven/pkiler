@@ -1,12 +1,12 @@
 #!/bin/bash
-# Launch DTIP Reader with backend server
-cd ~/Desktop
+# Launch pkiler with backend server
+cd ~/Desktop/pkiler
 
 # Kill any existing server on port 8899
 lsof -ti:8899 | xargs kill 2>/dev/null
 
 # Start backend server
-python3 reader_server.py &
+python3 pkiler.app/Contents/Resources/pkiler_server.py &
 SERVER_PID=$!
 
 # Wait for server to start

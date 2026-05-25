@@ -9,6 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;background:#0d1117;color:#e6edf3}
+
 .app{display:flex;flex-direction:column;height:100vh}
 .header{background:#161b22;border-bottom:1px solid #30363d;padding:8px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .header h1{font-size:14px;font-weight:600;color:#e6edf3;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -26,9 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans
 .right .r-body .ctext p{margin:14px 0;padding-bottom:14px;border-bottom:1px solid #21262d}
 .right .r-body .ctext p:first-child::first-letter{font-size:28px;font-weight:700;color:#58a6ff;float:left;margin:0 8px 0 0;line-height:1}
 .right .r-body .ctext h1,.right .r-body .ctext h2,.right .r-body .ctext h3{color:#58a6ff;margin:12px 0 8px 0}
-.right .r-body .ctext h1{font-size:18px}
-.right .r-body .ctext h2{font-size:16px}
-.right .r-body .ctext h3{font-size:14px}
+.right .r-body .ctext h1{font-size:18px}.right .r-body .ctext h2{font-size:16px}.right .r-body .ctext h3{font-size:14px}
 .right .r-body .ctext ul,.right .r-body .ctext ol{margin:8px 0 8px 20px}
 .right .r-body .ctext li{margin:4px 0}
 .right .r-body .ctext code{background:#21262d;padding:2px 6px;border-radius:3px;font-size:12px;color:#f0883e}
@@ -38,6 +37,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans
 .right .r-body .ctext table{border-collapse:collapse;margin:8px 0;width:100%}
 .right .r-body .ctext th,.right .r-body .ctext td{border:1px solid #30363d;padding:6px 10px;text-align:left}
 .right .r-body .ctext th{background:#161b22;color:#58a6ff}
+
 .nav{background:#161b22;border-top:1px solid #30363d;padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .nav button{background:#21262d;color:#e6edf3;border:1px solid #30363d;padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s}
 .nav button:hover{background:#30363d;border-color:#484f58}
@@ -50,13 +50,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans
 .nav .pg span{color:#58a6ff;font-weight:600}
 .progress{height:2px;background:#21262d;flex-shrink:0}
 .progress .fill{height:100%;background:linear-gradient(90deg,#1f6feb,#58a6ff);transition:width .3s}
+
+/* Dropzone overlay */
+.dropzone-overlay{display:none;position:fixed;inset:0;background:rgba(13,17,23,0.92);z-index:200;justify-content:center;align-items:center;flex-direction:column;gap:16px}
+.dropzone-overlay.active{display:flex}
+.dropzone-overlay .dz-icon{font-size:64px;opacity:0.6}
+.dropzone-overlay h2{font-size:24px;color:#58a6ff}
+.dropzone-overlay p{font-size:14px;color:#8b949e}
+
+/* Welcome screen */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;padding:40px}
+.welcome .icon{font-size:72px;opacity:0.4}
+.welcome h2{font-size:20px;color:#e6edf3;font-weight:600}
+.welcome p{font-size:14px;color:#8b949e;text-align:center;max-width:360px;line-height:1.6}
+.welcome .upload-btn{background:#1f6feb;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:15px;cursor:pointer;transition:all .15s}
+.welcome .upload-btn:hover{background:#388bfd;transform:translateY(-1px)}
+.welcome .shortcut{font-size:11px;color:#484f58;margin-top:8px}
+
+/* TOC */
 .toc-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;justify-content:center;align-items:center}
 .toc-bg.show{display:flex}
 .toc{background:#161b22;border:1px solid #30363d;border-radius:12px;width:480px;max-height:70vh;overflow-y:auto;padding:20px}
 .toc h3{font-size:14px;color:#58a6ff;margin-bottom:12px}
 .toc .ti{padding:6px 10px;cursor:pointer;border-radius:6px;font-size:12px;color:#c9d1d9;display:flex;gap:8px}
 .toc .ti:hover{background:#21262d}
+.toc .ti.active{background:#1f6feb22;border:1px solid #1f6feb44}
 .toc .ti .tn{color:#58a6ff;font-weight:600;min-width:24px}
+
 .error{color:#f85149;background:#1c1017;border:1px solid #f8514933;padding:12px;border-radius:6px;margin:8px 0}
 .toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;margin-left:8px}
 .toggle-wrap input{display:none}
@@ -66,229 +86,309 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans
 .toggle-wrap input:checked+.toggle-slider::after{left:16px;background:#fff}
 .toggle-label{font-size:11px;color:#8b949e}
 .toggle-wrap input:checked~.toggle-label{color:#58a6ff}
+
+/* Loading spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Shortcuts hint */
+.shortcuts-hint{position:fixed;bottom:50px;right:20px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px 14px;font-size:11px;color:#8b949e;line-height:1.8;z-index:50;display:none}
+.shortcuts-hint kbd{background:#21262d;border:1px solid #30363d;border-radius:3px;padding:1px 5px;font-size:10px;color:#e6edf3}
+.app:hover .shortcuts-hint{display:block}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <div class="header">
-    <h1 id="titleEl">📄 pkiler — AI 幻灯片解读器</h1>
+    <h1 id="titleEl">pkiler — AI 幻灯片解读器</h1>
     <div class="meta" id="metaEl">打开 PDF 即可开始</div>
   </div>
-  <div class="progress"><div class="fill" id="pf" style="width:0%"></div></div>
-  <div class="main">
-    <div class="left">
+  <div class="progress"><div class="fill" id="progressFill" style="width:0%"></div></div>
+  <div class="main" id="mainArea">
+    <!-- Welcome screen (shown when no PDF loaded) -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="icon">PDF</div>
+      <h2>拖入 PDF 开始阅读</h2>
+      <p>AI 帮你解读每一页幻灯片。支持简略、标准、详细三种解读粒度。</p>
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">选择 PDF 文件</button>
+      <div class="shortcut">或直接将 PDF 拖入此窗口</div>
+      <input type="file" id="fileInput" accept=".pdf" style="display:none" onchange="handleFileSelect(this.files[0])">
+    </div>
+    <!-- Reader (hidden until PDF loaded) -->
+    <div class="left" id="leftPanel" style="display:none">
       <div class="slide-img-wrap"><img id="slideImg" src="" alt="slide"></div>
     </div>
-    <div class="right">
+    <div class="right" id="rightPanel" style="display:none">
       <div class="r-header">
-        <h2>🔍 AI 解读</h2>
+        <h2>AI 解读</h2>
         <div class="badge" id="badge">就绪</div>
       </div>
       <div class="r-body"><div class="ctext" id="ctext">点击「解读此页」查看 AI 解读。</div></div>
     </div>
   </div>
-  <div class="nav">
-    <button id="bp" onclick="go(-1)" disabled>◀ 上一页</button>
+  <div class="nav" id="navBar" style="display:none">
+    <button id="btnPrev" onclick="goPage(-1)" disabled>◀ 上一页</button>
     <button class="primary" id="btnBrief" onclick="analyze('brief')">简略</button>
     <button class="primary" id="btnStandard" onclick="analyze('standard')">标准</button>
     <button class="primary" id="btnDetail" onclick="analyze('detailed')">详细</button>
-    <div class="pg">第 <span id="cp">0</span> / <span id="tp">0</span> 页</div>
-    <button id="bn" onclick="go(1)" disabled>下一页 ▶</button>
-    <label class="toggle-wrap" title="通俗模式：用最简单的大白话解释，适合非专业人士">
+    <div class="pg">第 <span id="currentPage">0</span> / <span id="totalPages">0</span> 页</div>
+    <button id="btnNext" onclick="goPage(1)" disabled>下一页 ▶</button>
+    <label class="toggle-wrap" title="通俗模式：用最简单的大白话解释">
       <input type="checkbox" id="plainToggle">
       <span class="toggle-slider"></span>
       <span class="toggle-label">通俗模式</span>
     </label>
-    <button class="overview" id="btnOverview" onclick="overview()">📋 整体解读</button>
-    <button onclick="toggleToc()" style="background:none;border:none;color:#8b949e;font-size:12px;text-decoration:underline">📑 目录</button>
+    <button class="overview" id="btnOverview" onclick="doOverview()">整体解读</button>
+    <button onclick="toggleToc()" style="background:none;border:none;color:#8b949e;font-size:12px;text-decoration:underline">目录</button>
   </div>
 </div>
-<div class="toc-bg" id="tbg" onclick="if(event.target===this)toggleToc()">
-  <div class="toc"><h3>📑 目录</h3><div id="tl"></div></div>
-</div>
-<div class="dropzone" id="dropzone">
-  <h2>拖放 PDF 文件</h2>
-  <p>或将 PDF 拖入此窗口开始阅读</p>
-</div>
-<script>
-let P = [];
-let T = {};
-let N = 0;
-let c = 0;
-let isAnalyzing = false;
 
-function render() {
-  if (N === 0) return;
-  const p = P[c];
-  document.getElementById('slideImg').src = '/images/' + p.id;
-  document.getElementById('cp').textContent = p.id;
-  document.getElementById('tp').textContent = N;
-  document.getElementById('pf').style.width = ((p.id / N) * 100) + '%';
-  document.getElementById('bp').disabled = c === 0;
-  document.getElementById('bn').disabled = c === N - 1;
-  document.getElementById('badge').textContent = '就绪';
-  document.getElementById('ctext').innerHTML = '<span style="color:#8b949e">点击「解读此页」查看解读。</span>';
+<!-- Drop overlay (shown when dragging over window) -->
+<div class="dropzone-overlay" id="dropOverlay">
+  <div class="dz-icon">PDF</div>
+  <h2>释放以上传 PDF</h2>
+  <p>AI 将为你解读每一页内容</p>
+</div>
+
+<!-- TOC modal -->
+<div class="toc-bg" id="tocBg" onclick="if(event.target===this)toggleToc()">
+  <div class="toc"><h3>目录</h3><div id="tocList"></div></div>
+</div>
+
+<!-- Keyboard shortcuts hint -->
+<div class="shortcuts-hint">
+  <kbd>&#8592;</kbd> <kbd>&#8594;</kbd> 翻页 &nbsp;
+  <kbd>1</kbd> 简略 &nbsp;
+  <kbd>2</kbd> 标准 &nbsp;
+  <kbd>3</kbd> 详细 &nbsp;
+  <kbd>Esc</kbd> 目录
+</div>
+
+<script>
+// --- State ---
+let pages = [];          // [{id, title}, ...]
+let tocData = {};        // {pageNum: title, ...}
+let currentPageIdx = 0;
+let isStreaming = false;
+
+// --- DOM refs ---
+const $ = id => document.getElementById(id);
+
+// --- File handling ---
+function handleFileSelect(file) {
+  if (!file || !file.name.toLowerCase().endsWith('.pdf')) return;
+  uploadPdf(file);
 }
 
-function go(d) {
-  if (isAnalyzing) return;
-  c = Math.max(0, Math.min(N - 1, c + d));
-  render();
+// Drag and drop
+let dragCounter = 0;
+document.addEventListener('dragenter', e => {
+  e.preventDefault();
+  dragCounter++;
+  $('dropOverlay').classList.add('active');
+});
+document.addEventListener('dragleave', e => {
+  e.preventDefault();
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    $('dropOverlay').classList.remove('active');
+  }
+});
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  dragCounter = 0;
+  $('dropOverlay').classList.remove('active');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFileSelect(file);
+});
+
+async function uploadPdf(file) {
+  $('metaEl').textContent = '上传中...';
+  $('welcomeScreen').style.display = 'none';
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const resp = await fetch('/api/upload', { method: 'POST', body: form });
+    const data = await resp.json();
+    if (data.error) {
+      $('metaEl').textContent = '上传失败: ' + data.error;
+      $('welcomeScreen').style.display = '';
+      return;
+    }
+    pages = data.pages;
+    tocData = {};
+    pages.forEach(p => tocData[p.id] = p.title);
+    currentPageIdx = 0;
+
+    // Show reader UI
+    $('leftPanel').style.display = '';
+    $('rightPanel').style.display = '';
+    $('navBar').style.display = '';
+    $('totalPages').textContent = pages.length;
+    $('titleEl').textContent = file.name;
+    $('metaEl').textContent = pages.length + ' 页';
+
+    renderPage();
+  } catch (err) {
+    $('metaEl').textContent = '上传失败: ' + err.message;
+    $('welcomeScreen').style.display = '';
+  }
+}
+
+// --- Page navigation ---
+function renderPage() {
+  if (pages.length === 0) return;
+  const p = pages[currentPageIdx];
+  $('slideImg').src = '/images/' + p.id;
+  $('currentPage').textContent = p.id;
+  $('progressFill').style.width = (p.id / pages.length * 100) + '%';
+  $('btnPrev').disabled = currentPageIdx === 0;
+  $('btnNext').disabled = currentPageIdx === pages.length - 1;
+  $('badge').textContent = '就绪';
+  $('ctext').innerHTML = '<span style="color:#8b949e">点击「解读此页」查看解读。</span>';
+  buildToc();
+}
+
+function goPage(delta) {
+  if (isStreaming) return;
+  currentPageIdx = Math.max(0, Math.min(pages.length - 1, currentPageIdx + delta));
+  renderPage();
+}
+
+// --- SSE streaming (generic) ---
+function streamRequest(url, body, badgeText, onDone) {
+  if (isStreaming || pages.length === 0) return;
+  isStreaming = true;
+
+  // Disable buttons
+  document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => b.style.opacity = '0.5');
+  $('badge').innerHTML = '<span class="spinner"></span>' + badgeText;
+  $('ctext').innerHTML = '';
+  $('rightPanel').querySelector('.r-body').scrollTop = 0;
+
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  }).then(response => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+    let buffer = '';
+
+    function read() {
+      reader.read().then(({done, value}) => {
+        if (done) {
+          $('ctext').innerHTML = renderMarkdown(fullText);
+          $('badge').textContent = badgeText.replace('中...', '完成');
+          finish();
+          if (onDone) onDone(fullText);
+          return;
+        }
+        buffer += decoder.decode(value, {stream: true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') continue;
+          try {
+            const json = JSON.parse(data);
+            if (json.text) {
+              fullText += json.text;
+              $('ctext').innerHTML = renderMarkdown(fullText);
+              const rb = $('rightPanel').querySelector('.r-body');
+              rb.scrollTop = rb.scrollHeight;
+            }
+          } catch(e) {}
+        }
+        read();
+      }).catch(err => {
+        $('badge').textContent = '错误';
+        $('ctext').innerHTML = '<div class="error">' + err.message + '</div>';
+        finish();
+      });
+    }
+    read();
+  }).catch(err => {
+    $('badge').textContent = '连接失败';
+    $('ctext').innerHTML = '<div class="error">无法连接后端服务</div>';
+    finish();
+  });
+
+  function finish() {
+    isStreaming = false;
+    document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => b.style.opacity = '1');
+  }
 }
 
 function renderMarkdown(text) {
   try {
-    if (typeof marked !== 'undefined') {
-      return marked.parse(text);
-    }
+    if (typeof marked !== 'undefined') return marked.parse(text);
   } catch(e) {}
   return text.replace(/\n/g, '<br>');
 }
 
+// --- Analyze ---
 function analyze(level) {
-  if (isAnalyzing || N === 0) return;
-  isAnalyzing = true;
-  const p = P[c];
+  const p = pages[currentPageIdx];
   const labels = {brief:'简略', standard:'标准', detailed:'详细'};
-  document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '0.5'; });
-  document.getElementById(level === 'brief' ? 'btnBrief' : level === 'standard' ? 'btnStandard' : 'btnDetail').style.opacity = '1';
-  document.getElementById('badge').textContent = '第' + p.id + '页' + labels[level] + '解读中...';
-  document.getElementById('ctext').innerHTML = '<span style="color:#58a6ff">⏳ 正在' + labels[level] + '解读第' + p.id + '页...</span>';
-  document.querySelector('.r-body').scrollTop = 0;
+  // Highlight selected button
+  document.querySelectorAll('.nav button.primary').forEach(b => b.style.opacity = '0.5');
+  $(level === 'brief' ? 'btnBrief' : level === 'standard' ? 'btnStandard' : 'btnDetail').style.opacity = '1';
 
-  fetch('/api/analyze', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({page: p.id, text: p.title, use_image: true, level: level, plain: document.getElementById('plainToggle').checked, prompt: ''})
-  }).then(response => {
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = '';
-    let buffer = '';
-
-    function read() {
-      reader.read().then(({done, value}) => {
-        if (done) {
-          document.getElementById('ctext').innerHTML = renderMarkdown(fullText);
-          document.getElementById('badge').textContent = '第' + p.id + '页解读完成';
-          document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '1'; });
-          isAnalyzing = false;
-          return;
-        }
-        buffer += decoder.decode(value, {stream: true});
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-            try {
-              const json = JSON.parse(data);
-              if (json.text) {
-                fullText += json.text;
-                document.getElementById('ctext').textContent = fullText;
-                document.querySelector('.r-body').scrollTop = document.querySelector('.r-body').scrollHeight;
-              }
-            } catch(e) {}
-          }
-        }
-        read();
-      }).catch(err => {
-        document.getElementById('badge').textContent = '错误';
-        document.getElementById('ctext').innerHTML = '<div class="error">❌ ' + err.message + '</div>';
-        document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '1'; });
-        isAnalyzing = false;
-      });
-    }
-    read();
-  }).catch(err => {
-    document.getElementById('badge').textContent = '连接失败';
-    document.getElementById('ctext').innerHTML = '<div class="error">❌ 无法连接后端</div>';
-    document.querySelectorAll('.nav button.primary').forEach(b => { b.style.opacity = '1'; });
-    isAnalyzing = false;
-  });
+  streamRequest('/api/analyze', {
+    page: p.id,
+    text: p.title,
+    level: level,
+    plain: $('plainToggle').checked,
+    prompt: '',
+  }, '第' + p.id + '页' + labels[level] + '解读中...');
 }
 
-function overview() {
-  if (isAnalyzing || N === 0) return;
-  isAnalyzing = true;
-  document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '0.5'; });
-  document.getElementById('badge').textContent = '整体解读中...';
-  document.getElementById('ctext').innerHTML = '<span style="color:#58a6ff">⏳ 正在分析全部内容，请稍候...</span>';
-  document.querySelector('.r-body').scrollTop = 0;
-
-  const allTitles = P.map(p => '第' + p.id + '页：' + p.title).join('\n');
-
-  fetch('/api/overview', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({titles: allTitles, plain: document.getElementById('plainToggle').checked})
-  }).then(response => {
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = '';
-    let buffer = '';
-
-    function read() {
-      reader.read().then(({done, value}) => {
-        if (done) {
-          document.getElementById('badge').textContent = '整体解读完成';
-          document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '1'; });
-          isAnalyzing = false;
-          return;
-        }
-        buffer += decoder.decode(value, {stream: true});
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-            try {
-              const json = JSON.parse(data);
-              if (json.text) {
-                fullText += json.text;
-                document.getElementById('ctext').textContent = fullText;
-                document.querySelector('.r-body').scrollTop = document.querySelector('.r-body').scrollHeight;
-              }
-            } catch(e) {}
-          }
-        }
-        read();
-      }).catch(err => {
-        document.getElementById('badge').textContent = '错误';
-        document.getElementById('ctext').innerHTML = '<div class="error">❌ ' + err.message + '</div>';
-        document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '1'; });
-        isAnalyzing = false;
-      });
-    }
-    read();
-  }).catch(err => {
-    document.getElementById('badge').textContent = '连接失败';
-    document.getElementById('ctext').innerHTML = '<div class="error">❌ 无法连接后端</div>';
-    document.querySelectorAll('.nav button.primary, .nav button.overview').forEach(b => { b.style.opacity = '1'; });
-    isAnalyzing = false;
-  });
+// --- Overview ---
+function doOverview() {
+  const allTitles = pages.map(p => '第' + p.id + '页：' + p.title).join('\n');
+  streamRequest('/api/overview', {
+    titles: allTitles,
+    plain: $('plainToggle').checked,
+  }, '整体解读中...');
 }
 
-function toggleToc() { document.getElementById('tbg').classList.toggle('show'); }
+// --- TOC ---
+function toggleToc() { $('tocBg').classList.toggle('show'); }
+
 function buildToc() {
-  let h = '';
-  for (let i = 0; i < N; i++) {
-    const p = P[i]; const t = T[p.id] || '';
-    h += '<div class="ti" onclick="c=' + i + ';render();toggleToc()"><span class="tn">' + p.id + '</span><span>' + t + '</span></div>';
+  let html = '';
+  for (let i = 0; i < pages.length; i++) {
+    const p = pages[i];
+    const active = i === currentPageIdx ? ' active' : '';
+    html += '<div class="ti' + active + '" onclick="currentPageIdx=' + i + ';renderPage();toggleToc()"><span class="tn">' + p.id + '</span><span>' + (tocData[p.id] || '') + '</span></div>';
   }
-  document.getElementById('tl').innerHTML = h;
+  $('tocList').innerHTML = html;
 }
 
+// --- Keyboard shortcuts ---
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-  if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-  if (e.key === '1' && !isAnalyzing && N > 0) analyze('brief');
-  if (e.key === '2' && !isAnalyzing && N > 0) analyze('standard');
-  if (e.key === '3' && !isAnalyzing && N > 0) analyze('detailed');
+  if (pages.length === 0) return;
+  if (e.key === 'ArrowLeft') { e.preventDefault(); goPage(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); goPage(1); }
+  if (e.key === '1' && !isStreaming) analyze('brief');
+  if (e.key === '2' && !isStreaming) analyze('standard');
+  if (e.key === '3' && !isStreaming) analyze('detailed');
   if (e.key === 'Escape') toggleToc();
 });
+
+// --- Init: check config ---
+fetch('/api/config').then(r => r.json()).then(cfg => {
+  if (!cfg.has_key) {
+    $('ctext').innerHTML = '<div class="error">未配置 API Key。请在 pkiler.app/Contents/Resources/ 下创建 .env 文件，写入 PKILER_API_KEY=你的key</div>';
+  }
+}).catch(() => {});
 </script>
 </body>
 </html>
